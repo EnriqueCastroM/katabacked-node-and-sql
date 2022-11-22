@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const package = require("./package.json");
 
 require('dotenv').config()
  
@@ -18,7 +19,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/v1/', indexRouter);
 
 /* GET health page. */
-app.use('/health', (req, res, next) =>res.send({ status: "OK"}));
+app.use("/health", (req, res, next) => {
+
+  let healthInfo = {
+    status: "OK",
+    name: package.name,
+    version: package.version,
+  };
+
+  if (req.query.environment === "true") {
+    healthInfo = { ...healthInfo, environment: process.env.ENVIRONMENT };
+  }
+
+  res.send(healthInfo);
+});
 /* GET Not found */
 app.use('/*', (req, res, next) =>res.send({ message: "Not found"}));
 
